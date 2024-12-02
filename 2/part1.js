@@ -3,10 +3,7 @@ const stdinBuffer = fs.readFileSync(process.stdin.fd);
 const input = stdinBuffer.toString();
 const rows = input.split("\n");
 
-const safe_reports = rows.reduce((accumulator, row) => {
-  if (row === "") return accumulator; // Empty row check, skip
-
-  const report = row.split(" ").map(Number);
+const check_levels = (report) => {
   let direction = true; // ascending
   let valid = true;
 
@@ -33,6 +30,14 @@ const safe_reports = rows.reduce((accumulator, row) => {
     }
   }
 
+  return valid;
+};
+
+const safe_reports = rows.reduce((accumulator, row) => {
+  if (row === "") return accumulator; // Empty row check, skip
+
+  const report = row.split(" ").map(Number);
+  const valid = check_levels(report);
   return accumulator + (valid ? 1 : 0);
 }, 0);
 

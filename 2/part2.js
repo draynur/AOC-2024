@@ -3,10 +3,7 @@ const stdinBuffer = fs.readFileSync(process.stdin.fd);
 const input = stdinBuffer.toString();
 const rows = input.split("\n");
 
-const safe_reports = rows.reduce((accumulator, row) => {
-  if (row === "") return accumulator; // Empty row check, skip
-
-  const report = row.split(" ").map(Number);
+const check_levels = (report) => {
   let direction = true; // ascending
   let valid = true;
 
@@ -31,6 +28,24 @@ const safe_reports = rows.reduce((accumulator, row) => {
       // short circuit if we found an exception
       break;
     }
+  }
+
+  return valid;
+};
+
+const safe_reports = rows.reduce((accumulator, row) => {
+  if (row === "") return accumulator; // Empty row check, skip
+  const report = row.split(" ").map(Number);
+  let valid = check_levels(report);
+  let end = false;
+  let i = 0;
+
+  // We need to check to see if we can have
+  // any variation of a report that will solve.
+  // Skips if valid record from first attempt.
+  while (!end && !valid) {
+    valid = check_levels(report.toSpliced(i++, 1));
+    end = i === report.length;
   }
 
   return accumulator + (valid ? 1 : 0);
