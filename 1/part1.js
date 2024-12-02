@@ -1,7 +1,15 @@
 const fs = require("fs");
-const stdinBuffer = fs.readFileSync(process.stdin.fd);
-const input = stdinBuffer.toString();
-const rows = input.split("\n");
+
+let buffer, input, rows;
+
+try {
+  buffer = fs.readFileSync(__dirname + "/input.txt", "utf8");
+} catch (e) {
+  throw e;
+}
+
+input = buffer.toString();
+rows = input.split("\n");
 
 const left_list = [];
 const right_list = [];
