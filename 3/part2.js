@@ -63,17 +63,50 @@ const multiply_sum = rows.reduce((accumulator, row) => {
 
   // Find safe zones? 0 -> first dont -> first do -> second dont
 
-  for (const expression in expressions) {
-    // Check dos & donts
-    // Add!
+  let do_index = 0, dont_index = 0;
+
+  for (let i = 0; i < expressions.length; i++) {
+    const expression = expressions[i];
+    const expression_index = expression.index
+
+    if (expression_index < donts[dont_index]) {
+      while (donts[dont_index] < expression_index && dont_index < donts.length) {
+        dont_index++;
+      }
+
+      if (!(expression_index < donts[dont_index])) {
+        sum += Number(expression[1]) * Number(expression[2])
+      }
+      // sum += Number(expression[1]) * Number(expression[2])
+      // if (dos[do_index] < expression_index && do_index < dos.length) {
+      //   do_index++;
+      // }
+      // while (dos[do_index] < expression_index && do_index < dos.length) {
+      //   do_index++;
+      // }
+    } else {
+      if (expression_index > dos[do_index]) {
+
+        while (donts[dont_index] < expression_index && dont_index < donts.length) {
+          dont_index++;
+        }
+
+        if (!(expression_index < donts[dont_index])) {
+          sum += Number(expression[1]) * Number(expression[2])
+        }
+
+      } else {
+        while (dos[do_index] < expression_index && do_index < dos.length) {
+          do_index++;
+        }
+
+        if (expression_index > dos[do_index]) {
+          sum += Number(expression[1]) * Number(expression[2])
+        }
+      }
+    }
   }
-
-  // Go through expressions
-  // Check to see if don't has popped up
-  // Ignore expressions until do pops up
-  // Repeat
-
-  console.log({ expressions, donts, dos });
+  // console.log({ expressions, donts, dos });
 
   return accumulator + sum;
 }, 0);
