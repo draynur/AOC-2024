@@ -31,12 +31,7 @@ rows.forEach((row) => {
 });
 
 const similarity_score = left_list.reduce((accumulator, item) => {
-  let score = 0;
-
-  if (right_list[item]) {
-    score = Number(item) * Number(right_list[item]);
-  }
-  return accumulator + score;
+  return accumulator + (right_list[item] ? Number(item) * Number(right_list[item]) : 0)
 }, 0);
 
 console.log({ similarity_score });
