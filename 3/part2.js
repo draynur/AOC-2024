@@ -3,7 +3,7 @@ const fs = require("fs");
 let buffer, input, rows;
 
 try {
-  buffer = fs.readFileSync(__dirname + "/input.txt", "utf8");
+  buffer = fs.readFileSync(__dirname + "/sample.txt", "utf8");
 } catch (e) {
   throw e;
 }
@@ -14,7 +14,7 @@ rows = input.split("\n");
 const multiply_sum = rows.reduce((accumulator, row) => {
   if (row === "") return accumulator; // Empty row check, skip
   let sum = 0;
-  let results, expressions = [], donts = [], dos = [];
+  let results, expressions = [], donts = [], dos = [], muls = [];
 
   // Match mul(x,y) from row as string
   const expression_regex = /mul\((\d+)\,(\d+)\)/g;
@@ -71,42 +71,44 @@ const multiply_sum = rows.reduce((accumulator, row) => {
 
     if (expression_index < donts[dont_index]) {
       while (donts[dont_index] < expression_index && dont_index < donts.length) {
+        console.log(`Moving dont_index forward: ${dont_index} -> ${dont_index + 1}`);
         dont_index++;
       }
 
-      if (!(expression_index < donts[dont_index])) {
-        sum += Number(expression[1]) * Number(expression[2])
-      }
-      // sum += Number(expression[1]) * Number(expression[2])
-      // if (dos[do_index] < expression_index && do_index < dos.length) {
-      //   do_index++;
-      // }
-      // while (dos[do_index] < expression_index && do_index < dos.length) {
-      //   do_index++;
-      // }
+      console.log(`Found mul(), adding ${expression[1]} x ${expression[2]} @ ${expression_index}`);
+      sum += (expression[1]) * (expression[2])
+      muls.push(expression_index)
+
     } else {
       if (expression_index > dos[do_index]) {
 
-        while (donts[dont_index] < expression_index && dont_index < donts.length) {
+        if (dos[dont_index] > donts[dont_index]) {
+          console.log(`Found mul(), adding ${expression[1]} x ${expression[2]} @ ${expression_index}`);
+          sum += (expression[1]) * (expression[2])
+          muls.push(expression_index)
+        }
+
+        while (donts[dont_index] < expression_index && dont_index < donts.length - 1) {
+          console.log(`Moving dont_index forward: ${dont_index} -> ${dont_index + 1}`);
           dont_index++;
         }
 
-        if (!(expression_index < donts[dont_index])) {
-          sum += Number(expression[1]) * Number(expression[2])
-        }
-
       } else {
-        while (dos[do_index] < expression_index && do_index < dos.length) {
+        while (dos[do_index] < expression_index && do_index < dos.length - 1) {
+          console.log(`Moving do_index forward: ${dont_index} -> ${dont_index + 1}`);
           do_index++;
         }
 
         if (expression_index > dos[do_index]) {
-          sum += Number(expression[1]) * Number(expression[2])
+          console.log(`Found mul(), adding ${expression[1]} x ${expression[2]} @ ${expression_index}`);
+          sum += (expression[1]) * (expression[2])
+          muls.push(expression_index)
         }
       }
     }
   }
-  // console.log({ expressions, donts, dos });
+  console.log({ expressions: expressions.map(el => el.index), sucessful_expressions: muls, expression_length: expressions.length, donts, dos });
+  // console.table(muls);
 
   return accumulator + sum;
 }, 0);
