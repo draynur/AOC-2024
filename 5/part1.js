@@ -1,150 +1,66 @@
 const fs = require("fs");
+const filename = "input.txt";
 
-var buffer, input, rows;
+var buffer, rows;
 
 try {
-  buffer = fs.readFileSync(__dirname + "/input.txt", "utf8");
+  buffer = fs.readFileSync(__dirname + "/" + filename, "utf8");
 } catch (e) {
   throw e;
 }
 
-input = buffer.toString();
-rows = input.split("\n").map(el => el.split(""));
+rows = buffer.toString().split("\n");
 
-function find_xmas(letter, i, j) {
-  let total = 0;
-  if (letter !== 'X') return total; // This aint it fam
+var after_check_object = {}, flag = false, valid_instructions = 0;
 
-  // If the coords exists, check for the letter
-  // S ? ? ? ? ? ?
-  // ? A ? ? ? ? ?
-  // ? ? M ? ? ? ?
-  // ? ? ? X ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  if (rows[i - 1] && rows[i - 1][j - 1] && rows[i - 1][j - 1] === "M") {
-    if (rows[i - 2] && rows[i - 2][j - 2] && rows[i - 2][j - 2] === "A") {
-      if (rows[i - 3] && rows[i - 3][j - 3] && rows[i - 3][j - 3] === "S") {
-        total++;
-      }
-    }
+for (let i = 0; i < rows.length - 1; i++) {
+  let row = rows[i];
+
+  if (row == "") {
+    flag = true;
+    continue;
   }
 
-  // ? ? ? S ? ? ?
-  // ? ? ? A ? ? ?
-  // ? ? ? M ? ? ?
-  // ? ? ? X ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  if (rows[i - 1] && rows[i - 1][j] && rows[i - 1][j] === "M") {
-    if (rows[i - 2] && rows[i - 2][j] && rows[i - 2][j] === "A") {
-      if (rows[i - 3] && rows[i - 3][j] && rows[i - 3][j] === "S") {
-        total++;
+  if (!flag) {
+    // Store rules
+    const [a, b] = row.split("|");
+    if (after_check_object[a] == undefined) {
+      after_check_object[a] = {
+        after: [b]
+      };
+    } else {
+      if (!after_check_object[a].after.includes(b)) {
+        after_check_object[a].after.push(b);
       }
     }
-  }
+  } else {
+    let numbers = row.split(",");
+    let valid_instruction = true;
 
-  // ? ? ? ? ? ? S
-  // ? ? ? ? ? A ?
-  // ? ? ? ? M ? ?
-  // ? ? ? X ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  if (rows[i - 1] && rows[i - 1][j + 1] && rows[i - 1][j + 1] === "M") {
-    if (rows[i - 2] && rows[i - 2][j + 2] && rows[i - 2][j + 2] === "A") {
-      if (rows[i - 3] && rows[i - 3][j + 3] && rows[i - 3][j + 3] === "S") {
-        total++;
+    for (let j = 0; j < rows.length - 1; j++) {
+      let number = numbers[j];
+      let remainder_numbers = numbers.slice(j + 1);
+
+      for (let k = 0; k < remainder_numbers.length; k++) {
+        if (!after_check_object[number] || !after_check_object[number].after.includes(remainder_numbers[k])) {
+          valid_instruction = false;
+          break;
+        }
+      }
+
+      if (valid_instruction === false) {
+        break;
       }
     }
-  }
 
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? X M A S
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  if (rows[i] && rows[i][j + 1] && rows[i][j + 1] === "M") {
-    if (rows[i] && rows[i][j + 2] && rows[i][j + 2] === "A") {
-      if (rows[i] && rows[i][j + 3] && rows[i][j + 3] === "S") {
-        total++;
-      }
+    if (valid_instruction) {
+      // console.log("Valid instruction list! ", { numbers, valid_instruction });
+      valid_instructions += Number(numbers[Math.floor(numbers.length / 2)]);
     }
-  }
 
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? X ? ? ?
-  // ? ? ? ? M ? ?
-  // ? ? ? ? ? A ?
-  // ? ? ? ? ? ? S
-  if (rows[i + 1] && rows[i + 1][j + 1] && rows[i + 1][j + 1] === "M") {
-    if (rows[i + 2] && rows[i + 2][j + 2] && rows[i + 2][j + 2] === "A") {
-      if (rows[i + 3] && rows[i + 3][j + 3] && rows[i + 3][j + 3] === "S") {
-        total++;
-      }
-    }
-  }
-
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? X ? ? ?
-  // ? ? ? M ? ? ?
-  // ? ? ? A ? ? ?
-  // ? ? ? S ? ? ?
-  if (rows[i + 1] && rows[i + 1][j] && rows[i + 1][j] === "M") {
-    if (rows[i + 2] && rows[i + 2][j] && rows[i + 2][j] === "A") {
-      if (rows[i + 3] && rows[i + 3][j] && rows[i + 3][j] === "S") {
-        total++;
-      }
-    }
-  }
-
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? X ? ? ?
-  // ? ? M ? ? ? ?
-  // ? A ? ? ? ? ?
-  // S ? ? ? ? ? ?
-  if (rows[i + 1] && rows[i + 1][j - 1] && rows[i + 1][j - 1] === "M") {
-    if (rows[i + 2] && rows[i + 2][j - 2] && rows[i + 2][j - 2] === "A") {
-      if (rows[i + 3] && rows[i + 3][j - 3] && rows[i + 3][j - 3] === "S") {
-        total++;
-      }
-    }
-  }
-
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // S A M X ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  // ? ? ? ? ? ? ?
-  if (rows[i] && rows[i][j - 1] && rows[i][j - 1] === "M") {
-    if (rows[i] && rows[i][j - 2] && rows[i][j - 2] === "A") {
-      if (rows[i] && rows[i][j - 3] && rows[i][j - 3] === "S") {
-        total++;
-      }
-    }
-  }
-
-  return total;
-}
-
-let found_xmass = 0;
-
-for (let i = 0; i < rows.length; i++) {
-  for (let j = 0; j < rows[i].length; j++) {
-    found_xmass += find_xmas(rows[i][j], i, j);
   }
 }
 
-console.log({ found_xmass });
+// console.table(rows);
+// console.dir(after_check_object, { depth: null });
+console.log({ valid_instructions });

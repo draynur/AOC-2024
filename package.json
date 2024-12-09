@@ -12,7 +12,9 @@
     "3-1": "node 3/part1.js",
     "3-2": "node 3/part2.js",
     "4-1": "node 4/part1.js",
-    "4-2": "node 4/part2.js"
+    "4-2": "node 4/part2.js",
+    "5-1": "node 5/part1.js",
+    "5-2": "node 5/part2.js"
   },
   "keywords": [
     "aoc-2024"

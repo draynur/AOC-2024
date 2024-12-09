@@ -1,7 +1,7 @@
 const fs = require("fs");
-const filename = "input.txt";
+const filename = "sample.txt";
 
-var buffer, input, rows;
+var buffer, rows;
 
 try {
   buffer = fs.readFileSync(__dirname + "/" + filename, "utf8");
@@ -9,76 +9,58 @@ try {
   throw e;
 }
 
-input = buffer.toString();
-rows = input.split("\n").map(el => el.split(""));
+rows = buffer.toString().split("\n");
 
-function find_xmas(letter, i, j) {
-  let total = 0;
-  if (letter !== 'A') return total; // This aint it fam
+var after_check_object = {}, flag = false, valid_instructions = 0;
 
-  // If the coords exists, check for the letter
-  // M ? S
-  // ? A ?
-  // M ? S
-  if (rows[i - 1] && rows[i - 1][j - 1] && rows[i - 1][j - 1] === "M") {
-    if (rows[i - 1] && rows[i - 1][j + 1] && rows[i - 1][j + 1] === "S") {
-      if (rows[i + 1] && rows[i + 1][j - 1] && rows[i + 1][j - 1] === "M") {
-        if (rows[i + 1] && rows[i + 1][j + 1] && rows[i + 1][j + 1] === "S") {
-          total++;
-        }
-      }
-    }
+for (let i = 0; i < rows.length - 1; i++) {
+  let row = rows[i];
+
+  if (row == "") {
+    flag = true;
+    continue;
   }
 
-  // M ? M
-  // ? A ?
-  // S ? S
-  if (rows[i - 1] && rows[i - 1][j - 1] && rows[i - 1][j - 1] === "M") {
-    if (rows[i - 1] && rows[i - 1][j + 1] && rows[i - 1][j + 1] === "M") {
-      if (rows[i + 1] && rows[i + 1][j - 1] && rows[i + 1][j - 1] === "S") {
-        if (rows[i + 1] && rows[i + 1][j + 1] && rows[i + 1][j + 1] === "S") {
-          total++;
-        }
+  if (!flag) {
+    // Store rules
+    const [a, b] = row.split("|");
+    if (after_check_object[a] == undefined) {
+      after_check_object[a] = {
+        after: [b]
+      };
+    } else {
+      if (!after_check_object[a].after.includes(b)) {
+        after_check_object[a].after.push(b);
       }
     }
-  }
+  } else {
+    let numbers = row.split(",");
+    let valid_instruction = true;
 
-  // S ? S
-  // ? A ?
-  // M ? M
-  if (rows[i - 1] && rows[i - 1][j - 1] && rows[i - 1][j - 1] === "S") {
-    if (rows[i - 1] && rows[i - 1][j + 1] && rows[i - 1][j + 1] === "S") {
-      if (rows[i + 1] && rows[i + 1][j - 1] && rows[i + 1][j - 1] === "M") {
-        if (rows[i + 1] && rows[i + 1][j + 1] && rows[i + 1][j + 1] === "M") {
-          total++;
+    for (let j = 0; j < rows.length - 1; j++) {
+      let number = numbers[j];
+      let remainder_numbers = numbers.slice(j + 1);
+
+      for (let k = 0; k < remainder_numbers.length; k++) {
+        if (!after_check_object[number] || !after_check_object[number].after.includes(remainder_numbers[k])) {
+          valid_instruction = false;
+          break;
         }
       }
-    }
-  }
 
-  // S ? M
-  // ? A ?
-  // S ? M
-  if (rows[i - 1] && rows[i - 1][j - 1] && rows[i - 1][j - 1] === "S") {
-    if (rows[i - 1] && rows[i - 1][j + 1] && rows[i - 1][j + 1] === "M") {
-      if (rows[i + 1] && rows[i + 1][j - 1] && rows[i + 1][j - 1] === "S") {
-        if (rows[i + 1] && rows[i + 1][j + 1] && rows[i + 1][j + 1] === "M") {
-          total++;
-        }
+      if (valid_instruction === false) {
+        break;
       }
     }
-  }
 
+    if (!valid_instruction) {
+      console.log("Invalid instruction list! ", { numbers, valid_instruction });
 
-  return total;
-}
+    }
 
-let found_xmass = 0;
-
-for (let i = 0; i < rows.length; i++) {
-  for (let j = 0; j < rows[i].length; j++) {
-    found_xmass += find_xmas(rows[i][j], i, j);
   }
 }
 
-console.log({ found_xmass });
+// console.table(rows);
+// console.dir(after_check_object, { depth: null });
+console.log({ valid_instructions });
